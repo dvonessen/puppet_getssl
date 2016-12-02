@@ -36,16 +36,38 @@
 # -------
 #
 # Author Name <github@thielking-vonessen.de>
-#
-# Copyright
-# ---------
-#
-# Copyright 2016 Daniel Thielking, unless otherwise noted.
-#
+
 class getssl (
-  $base_dir = '/opt/getssl',
-  $conf_dir = '/opt/getssl/conf',
+  $base_dir                  = '/opt/getssl',
+  $production                = false,
+  $global_account_mail       = undef,
+  $global_account_key_length = 4096,
+  $global_private_key_alg    = 'rsa',
+  $global_agreement          = undef,
+  $global_reload_command     = undef,
+  $global_reuse_private_key  = true,
+  $global_renew_allow        = 30,
+  $global_server_type        = 'https',
+  $global_check_remote       = true,
+  $global_ssl_conf           = "/usr/lib/ssl/openssl.cnf",
 ) inherits params{
+
+  # Check all variables
+  validate_string($base_dir)
+
+  # Use production api of letsencrypt if $production is true
+  if $production {
+    $global_ca = 'https://acme-v01.api.letsencrypt.org'
+  } else {
+    $global_ca = 'https://acme-staging.api.letsencrypt.org'
+  }
+
+  if $global_account_email == undef {
+    fail('$global_account_mail must be specified!')
+  }
+
+
+
   # Create Directories under /opt
   file { $base_dir:
     ensure => directory,
@@ -53,7 +75,7 @@ class getssl (
     group  => root,
     mode   => '0755',
   }
-  file { $conf_dir:
+  file { "${base_dir}/conf":
     ensure  => directory,
     owner   => root,
     group   => root,

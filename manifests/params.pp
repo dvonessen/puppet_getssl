@@ -10,11 +10,12 @@ class getssl::params{
   $global_server_type        = 'https'
   $global_check_remote       = true
   $global_ssl_conf           = "/usr/lib/ssl/openssl.cnf"
-  $manage_packages           = true
+  $manage_packages           = false
   $packages                  = ['curl']
 
   if $manage_packages {
     package { $packages:
-      ensure => "latest",
+      ensure => latest,
+    }
   }
 }

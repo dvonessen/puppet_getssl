@@ -53,18 +53,11 @@ class getssl (
 
   # Check all variables
   validate_string($base_dir, $global_ssl_conf, $global_server_type)
-  validate_integer($global_account_key_length, $global_renew_allow)
+  validate_integer($global_account_key_length)
+  validate_integer($global_renew_allow)
   validate_bool($production, $global_reuse_private_key, $global_check_remote, $manage_packages)
   validate_array($packages)
-  validate_hash()
-
-  if $global_account_mail {
-    validate_string($global_account_mail)
-  } else {
-    fail('$global_account_mail: undef, please configure global mail address')
-  }
-
-
+#  validate_hash()
 
   # Create Directories under /opt
   file { $base_dir:
@@ -85,10 +78,5 @@ class getssl (
     group  => root,
     mode   => '0700',
     source => 'https://raw.githubusercontent.com/srvrco/getssl/master/getssl',
-  }
-
-  # Include global configuration class
-  class { '::getssl::global':
-    require => File["${base_dir}/getssl",
   }
 }

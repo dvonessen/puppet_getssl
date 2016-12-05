@@ -1,22 +1,30 @@
 class getssl::global (
+  $base_dir                  = $getssl::base_dir,
+  $staging_ca                = $getssl::params::staging_ca,
+  $prod_ca                   = $getssl::params::prod_ca,
   $production                = $getssl::params::production,
-  $base_dir                  = $getssl::params::base_dir,
-  $global_account_mail       = $getssl::params::global_account_mail,
-  $global_account_key_length = $getssl::params::global_account_key_length,
-  $global_private_key_alg    = $getssl::params::global_private_key_alg,
-  $global_reload_command     = $getssl::params::global_reload_command,
-  $global_reuse_private_key  = $getssl::params::global_reuse_private_key,
-  $global_renew_allow        = $getssl::params::global_renew_allow,
-  $global_server_type        = $getssl::params::global_server_type,
-  $global_check_remote       = $getssl::params::global_check_remote,
-  $global_ssl_conf           = $getssl::params::global_ssl_conf,
-  $domain_hash               = $getssl::params::domain_hash,
-) {
+  $domain                    = undef,
+  $sub_domains               = [],
+  $use_single_acl            = $getssl::params::use_single_acl,
+  $domain_account_mail       = $getssl::params::domain_account_mail,
+  $domain_account_key_length = $getssl::params::domain_account_key_length,
+  $domain_private_key_alg    = $getssl::params::domain_private_key_alg,
+  $domain_reload_command     = $getssl::params::domain_reload_command,
+  $domain_renew_allow        = $getssl::params::domain_renew_allow,
+  $domain_server_type        = $getssl::params::domain_server_type,
+  $domain_check_remote       = $getssl::params::domain_check_remote,
+  $domain_cert_location      = $getssl::params::domain_cert_location,
+  $domain_key_location       = $getssl::params::domain_key_location,
+  $ca_cert_location          = $getssl::params::ca_cert_location,
+  $domain_chain_location     = $getssl::params::domain_chain_location,
+  $domain_key_cert_location  = $getssl::params::domain_key_cert_location,
+  $domain_pem_location       = $getssl::params::domain_pem_location,
+) inherits getssl::params {
   # Use production api of letsencrypt if $production is true
-  if $domain_production {
-    $domain_ca = 'https://acme-v01.api.letsencrypt.org'
+  if $production {
+    $domain_ca = $prod_ca
   } else {
-    $domain_ca = 'https://acme-staging.api.letsencrypt.org'
+    $ca = $staging_ca
   }
 
   if $domain_account_mail {

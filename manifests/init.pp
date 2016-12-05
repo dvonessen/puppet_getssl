@@ -38,32 +38,30 @@
 # Author Name <github@thielking-vonessen.de>
 
 class getssl (
-  $base_dir                  = '/opt/getssl',
-  $production                = false,
-  $global_account_mail       = undef,
-  $global_account_key_length = 4096,
-  $global_private_key_alg    = 'rsa',
-  $global_agreement          = undef,
-  $global_reload_command     = undef,
-  $global_reuse_private_key  = true,
-  $global_renew_allow        = 30,
-  $global_server_type        = 'https',
-  $global_check_remote       = true,
-  $global_ssl_conf           = "/usr/lib/ssl/openssl.cnf",
-) inherits params{
+  $base_dir                  = $getssl::params::base_dir,
+  $production                = $getssl::params::production,
+  $global_account_mail       = $getssl::params::global_account_mail,
+  $global_account_key_length = $getssl::params::global_account_key_length,
+  $global_agreement          = $getssl::params::global_agreement,
+  $global_reload_command     = $getssl::params::global_reload_command,
+  $global_reuse_private_key  = $getssl::params::global_reuse_private_key,
+  $global_renew_allow        = $getssl::params::global_renew_allow,
+  $global_server_type        = $getssl::params::global_server_type,
+  $global_check_remote       = $getssl::params::global_check_remote,
+  $global_ssl_conf           = $getssl::params::global_ssl_conf,
+) inherits getssl::params {
 
   # Check all variables
-  validate_string($base_dir)
+  validate_string($base_dir, $global_ssl_conf, $global_server_type)
+  validate_integer($global_account_key_length, $global_renew_allow)
+  validate_bool($production, $global_reuse_private_key, $global_check_remote, $manage_packages)
+  validate_array($packages)
+  validate_hash()
 
-  # Use production api of letsencrypt if $production is true
-  if $production {
-    $global_ca = 'https://acme-v01.api.letsencrypt.org'
+  if $global_account_mail {
+    validate_string($global_account_mail)
   } else {
-    $global_ca = 'https://acme-staging.api.letsencrypt.org'
-  }
-
-  if $global_account_email == undef {
-    fail('$global_account_mail must be specified!')
+    fail('$global_account_mail: undef, please configure global mail address')
   }
 
 
@@ -80,7 +78,6 @@ class getssl (
     owner   => root,
     group   => root,
     mode    => '0755',
-    require => File[$base_dir],
   }
   file { "${base_dir}/getssl":
     ensure => file,
@@ -88,6 +85,10 @@ class getssl (
     group  => root,
     mode   => '0700',
     source => 'https://raw.githubusercontent.com/srvrco/getssl/master/getssl',
-    require => File[$base_dir],
+  }
+
+  # Include global configuration class
+  class { '::getssl::global':
+    require => File["${base_dir}/getssl",
   }
 }

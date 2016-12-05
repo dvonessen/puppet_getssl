@@ -13,9 +13,4 @@ class getssl::params{
   $manage_packages           = false
   $packages                  = ['curl']
 
-  if $manage_packages {
-    package { $packages:
-      ensure => latest,
-    }
-  }
 }

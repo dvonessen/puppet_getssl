@@ -38,26 +38,21 @@
 # Author Name <github@thielking-vonessen.de>
 
 class getssl (
-  $base_dir                  = $getssl::params::base_dir,
-  $production                = $getssl::params::production,
-  $global_account_mail       = $getssl::params::global_account_mail,
-  $global_account_key_length = $getssl::params::global_account_key_length,
-  $global_agreement          = $getssl::params::global_agreement,
-  $global_reload_command     = $getssl::params::global_reload_command,
-  $global_reuse_private_key  = $getssl::params::global_reuse_private_key,
-  $global_renew_allow        = $getssl::params::global_renew_allow,
-  $global_server_type        = $getssl::params::global_server_type,
-  $global_check_remote       = $getssl::params::global_check_remote,
-  $global_ssl_conf           = $getssl::params::global_ssl_conf,
+  $base_dir        = $getssl::params::base_dir,
+  $manage_packages = $getssl::params::manage_packages,
+  $packages        = $getssl::params::packages,
 ) inherits getssl::params {
 
   # Check all variables
-  validate_string($base_dir, $global_ssl_conf, $global_server_type)
-  validate_integer($global_account_key_length)
-  validate_integer($global_renew_allow)
-  validate_bool($production, $global_reuse_private_key, $global_check_remote, $manage_packages)
+  validate_string($base_dir)
+  validate_bool($manage_packages)
   validate_array($packages)
-#  validate_hash()
+
+  if $manage_packages {
+    package { $packages:
+      ensure => latest,
+    }
+  }
 
   # Create Directories under /opt
   file { $base_dir:

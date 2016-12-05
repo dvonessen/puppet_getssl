@@ -21,8 +21,6 @@ class getssl::global (
 
   if $global_account_mail {
     validate_string($global_account_mail)
-  } else {
-    fail('$global_account_mail: undef, please configure global mail address')
   }
 
   file { "$base_dir/conf/getssl.cfg":

@@ -5,15 +5,17 @@ CA="<%= $global_ca -%>"
 #AGREEMENT="https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf"
 
 ACCOUNT_EMAIL="<%= $global_account_mail -%>"
-ACCOUNT_KEY_LENGTH=<%= $global_account_key_length -%>
-ACCOUNT_KEY="<%= $base_dir-%>/conf/account.key"
+ACCOUNT_KEY_LENGTH=<%= $global_account_key_length %>
+ACCOUNT_KEY="<%= $base_dir%>/conf/account.key"
 PRIVATE_KEY_ALG="<%= $global_private_key_alg -%>"
 REUSE_PRIVATE_KEY="<%= $global_reuse_private_key -%>"
 
 # The command needed to reload apache / nginx or whatever you use
-<% if $global_reload_command { %>
+<% if $global_reload_command { -%>
 RELOAD_CMD="<%= $global_reload_command -%>"
-<% } %>
+<% } else { -%>
+RELOAD_CMD=""
+<% } -%>
 
 # The time period within which you want to allow renewal of a certificate
 #  this prevents hitting some of the rate limits.

@@ -26,11 +26,11 @@ class getssl::global (
   }
 
   file { "$base_dir/conf/getssl.cfg":
-    ensure => file,
-    owner  => root,
-    group  => root,
-    mode   => 0644,
-    source => epp('puppet:///templates/global_getssl.cfg.epp', {
+    ensure  => file,
+    owner   => root,
+    group   => root,
+    mode    => "0644",
+    content => epp('getssl/global_getssl.cfg.epp', {
       'global_ca'                 => $global_ca,
       'global_account_mail'       => $global_account_mail,
       'global_account_key_length' => $global_account_key_length,

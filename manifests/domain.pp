@@ -27,6 +27,10 @@ class getssl::global (
   validate_bool($domain_check_remote, $use_single_acl)
   validate_array($sub_domains)
 
+  if $ca_cert_location {
+    validate_string($ca_cert_location)
+  }
+
   if $domain_cert_location {
     validate_string($domain_cert_location)
   }
@@ -53,7 +57,7 @@ class getssl::global (
 
   # Use production api of letsencrypt only if $production is true
   if $production {
-    $domain_ca = $prod_ca
+    $ca = $prod_ca
   } else {
     $ca = $staging_ca
   }
@@ -70,7 +74,7 @@ class getssl::global (
     fail('$domain_account_mail must be set')
   }
 
-  file { "${base_dir}/conf/{${domain}":
+  file { "${base_dir}/conf/${domain}":
     ensure  => directory,
     owner   => root,
     group   => root,
@@ -82,18 +86,23 @@ class getssl::global (
     owner   => root,
     group   => root,
     mode    => "0644",
-    content => epp('getssl/global_getssl.cfg.epp', {
-      'global_ca'                 => $global_ca,
-      'global_account_mail'       => $global_account_mail,
-      'global_account_key_length' => $global_account_key_length,
-      'base_dir'                  => $base_dir,
-      'global_private_key_alg'    => $global_private_key_alg,
-      'global_reuse_private_key'  => $global_reuse_private_key,
-      'global_reload_command'     => $global_reload_command,
-      'global_renew_allow'        => $global_renew_allow,
-      'global_server_type'        => $global_server_type,
-      'global_check_remote'       => $global_check_remote,
-      'global_ssl_conf'           => $global_ssl_conf,
+    content => epp('getssl/domain_getssl.cfg.epp', {
+     'ca'                        => $ca,
+     'ca_cert_location'          => $ca_cert_location,
+     'domain_account_key_length' => $domain_account_key_length,
+     'domain_account_mail'       => $domain_account_mail,
+     'domain_cert_location'      => $domain_cert_location,
+     'domain_chain_location'     => $domain_chain_location,
+     'domain_check_remote'       => $domain_check_remote,
+     'domain_key_cert_location'  => $domain_key_cert_location,
+     'domain_key_location'       => $domain_key_location,
+     'domain_pem_location'       => $domain_pem_location,
+     'domain_private_key_alg'    => $domain_private_key_alg,
+     'domain_reload_command'     => $domain_reload_command,
+     'domain_renew_allow'        => $domain_renew_allow,
+     'domain_server_type'        => $domain_server_type,
+     'sub_domains'               => $sub_domains,
+     'use_single_acl'            => $use_single_acl
     }),
   }
 }

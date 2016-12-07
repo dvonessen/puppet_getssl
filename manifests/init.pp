@@ -69,9 +69,10 @@ class getssl (
   }
   file { "${base_dir}/getssl":
     ensure => file,
+    force  => true,
     owner  => root,
     group  => root,
     mode   => '0700',
-    source => 'https://raw.githubusercontent.com/srvrco/getssl/master/getssl',
+    source => 'puppet:///modules/getssl/getssl.sh',
   }
 }

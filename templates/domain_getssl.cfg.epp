@@ -1,0 +1,55 @@
+# This file is maintained by Puppet
+
+CA=<%= $ca -%>
+
+#AGREEMENT="https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf"
+
+ACCOUNT_EMAIL="<%= $domain_account_email -%>"
+ACCOUNT_KEY_LENGTH=<%= $domain_account_key_lengt %>
+ACCOUNT_KEY="<%= $base_dir %>/config/<%= $domain %>/account.key"
+PRIVATE_KEY_ALG="<%= $private_key_alg -%>"
+
+# Additional domains - this could be multiple domains / subdomains in a comma separated list
+# Note: this is Additional domains - so should not include the primary domain.
+SANS="<%= join($sub_domains, ",") -%>,"
+
+# Acme Challenge Location. The first line for the domain, the following ones for each additional domain.
+# If these start with ssh: then the next variable is assumed to be the hostname and the rest the location.
+ACL=(<% $acl.each |$value| { %>'<%= $value %>' <% } %>)
+
+#Enable use of a single ACL for all checks
+USE_SINGLE_ACL=<%= $use_single_acl -%>
+
+# Location for all your certs, these can either be on the server (full path name)
+# or using ssh /sftp as for the ACL
+<% if $domain_cert_location { %>
+DOMAIN_CERT_LOCATION="<%= $domain_cert_location -%>"
+<% } %>
+<% if $domain_key_location { %>
+DOMAIN_KEY_LOCATION="<%= $domain_key_location -%>"
+<% } %>
+<% if $ca_cert_location { %>
+CA_CERT_LOCATION="<%= $domain_cert_location -%>"
+<% } %>
+<% if $domain_chain_location { %>
+DOMAIN_CHAIN_LOCATION="<%= $domain_chain_location -%>"
+<% } %>
+<% if $domain_key_cert_loaction { %>
+DOMAIN_KEY_CERT_LOCATION="<%= $domain_key_cert_location -%>"
+<% } %>
+<% if $domain_pem_location {%>
+DOMAIN_PEM_LOCATION="<%= $doamin_pem_location -%>"
+<% } %>
+
+# The command needed to reload apache / nginx or whatever you use
+RELOAD_CMD="<%= $domain_reload_command -%>"
+# The time period within which you want to allow renewal of a certificate
+#  this prevents hitting some of the rate limits.
+RENEW_ALLOW=<%= $domain_renew_allow %>
+
+# Define the server type. This can be https, ftp, ftpi, imap, imaps, pop3, pop3s, smtp,
+# smtps_deprecated, smtps, smtp_submission, xmpp, xmpps, ldaps or a port number which
+# will be checked for certificate expiry and also will be checked after
+# an update to confirm correct certificate is running (if CHECK_REMOTE) is set to true
+SERVER_TYPE="<%= $domain_server_type -%>"
+CHECK_REMOTE="<%= $domain_check_remote -%>"

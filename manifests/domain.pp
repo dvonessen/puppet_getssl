@@ -59,10 +59,10 @@ class getssl::domain (
     validate_array($sub_domains)
   }
 
-  if $acl {
+  if $acl and size($acl) > 0 { 
     validate_array($acl)
   } else {
-    fail('$acl has to be at least one entry for ACME Challenge Location')
+    fail('You have to set acl in your manifest!')
   }
 
   # Use production api of letsencrypt only if $production is true
@@ -97,9 +97,11 @@ class getssl::domain (
     group   => root,
     mode    => "0644",
     content => epp('getssl/domain_getssl.cfg.epp', {
+     'acl'                       => $acl,
      'base_dir'                  => $base_dir,
      'ca'                        => $ca,
      'ca_cert_location'          => $ca_cert_location,
+     'domain'                    => $domain,
      'domain_account_key_length' => $domain_account_key_length,
      'domain_account_mail'       => $domain_account_mail,
      'domain_cert_location'      => $domain_cert_location,

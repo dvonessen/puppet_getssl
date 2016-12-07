@@ -6,8 +6,8 @@ CA=<%= $ca -%>
 
 ACCOUNT_EMAIL="<%= $domain_account_email -%>"
 ACCOUNT_KEY_LENGTH=<%= $domain_account_key_lengt %>
-ACCOUNT_KEY="<%= $base_dir %>/config/<%= $domain %>/account.key"
-PRIVATE_KEY_ALG="<%= $private_key_alg -%>"
+ACCOUNT_KEY="<%= $base_dir %>/conf/<%= $domain %>/${domain}.key"
+PRIVATE_KEY_ALG="<%= $domain_private_key_alg -%>"
 
 # Additional domains - this could be multiple domains / subdomains in a comma separated list
 # Note: this is Additional domains - so should not include the primary domain.
@@ -15,31 +15,31 @@ SANS="<%= join($sub_domains, ",") -%>,"
 
 # Acme Challenge Location. The first line for the domain, the following ones for each additional domain.
 # If these start with ssh: then the next variable is assumed to be the hostname and the rest the location.
-ACL=(<% $acl.each |$value| { %>'<%= $value %>' <% } %>)
+ACL=(<% $acl.each |$value| { %>'<%= $value %>'<% } %>)
 
 #Enable use of a single ACL for all checks
 USE_SINGLE_ACL=<%= $use_single_acl -%>
 
 # Location for all your certs, these can either be on the server (full path name)
 # or using ssh /sftp as for the ACL
-<% if $domain_cert_location { %>
+<% if $domain_cert_location { -%>
 DOMAIN_CERT_LOCATION="<%= $domain_cert_location -%>"
-<% } %>
-<% if $domain_key_location { %>
+<% } -%>
+<% if $domain_key_location { -%>
 DOMAIN_KEY_LOCATION="<%= $domain_key_location -%>"
-<% } %>
-<% if $ca_cert_location { %>
+<% } -%>
+<% if $ca_cert_location { -%>
 CA_CERT_LOCATION="<%= $domain_cert_location -%>"
-<% } %>
-<% if $domain_chain_location { %>
+<% } -%>
+<% if $domain_chain_location { -%>
 DOMAIN_CHAIN_LOCATION="<%= $domain_chain_location -%>"
-<% } %>
-<% if $domain_key_cert_loaction { %>
+<% } -%>
+<% if $domain_key_cert_loaction { -%>
 DOMAIN_KEY_CERT_LOCATION="<%= $domain_key_cert_location -%>"
-<% } %>
-<% if $domain_pem_location {%>
+<% } -%>
+<% if $domain_pem_location { -%>
 DOMAIN_PEM_LOCATION="<%= $doamin_pem_location -%>"
-<% } %>
+<% } -%>
 
 # The command needed to reload apache / nginx or whatever you use
 RELOAD_CMD="<%= $domain_reload_command -%>"

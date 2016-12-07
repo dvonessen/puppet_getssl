@@ -3,6 +3,8 @@
 #
 # This is the default init.pp class. This Class installs getssl
 # and ensures that sufficient directories and files are createt.
+# 
+# Adds a cronjob to ensure all your certificates are updated properly
 #
 # Parameters
 # ----------

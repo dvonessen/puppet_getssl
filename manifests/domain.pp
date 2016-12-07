@@ -1,7 +1,8 @@
-class getssl::global (
+class getssl::domain (
   $base_dir                  = $getssl::base_dir,
   $ca_cert_location          = $getssl::params::ca_cert_location,
-  $domain                    = undef,
+  $domain                    = $getssl::params::domain,
+  $acl                       = $getssl::params::acl,
   $domain_account_key_length = $getssl::params::domain_account_key_length,
   $domain_account_mail       = $getssl::params::domain_account_mail,
   $domain_cert_location      = $getssl::params::domain_cert_location,
@@ -17,7 +18,7 @@ class getssl::global (
   $prod_ca                   = $getssl::params::prod_ca,
   $production                = $getssl::params::production,
   $staging_ca                = $getssl::params::staging_ca,
-  $sub_domains               = [],
+  $sub_domains               = $getssl::params::sub_domains,
   $use_single_acl            = $getssl::params::use_single_acl,
 ) inherits getssl::params {
 
@@ -25,7 +26,6 @@ class getssl::global (
   validate_integer($domain_account_key_length)
   validate_integer($domain_renew_allow)
   validate_bool($domain_check_remote, $use_single_acl)
-  validate_array($sub_domains)
 
   if $ca_cert_location {
     validate_string($ca_cert_location)
@@ -55,6 +55,16 @@ class getssl::global (
     validate_string($domain_reload_command)
   }
 
+  if $sub_domains {
+    validate_array($sub_domains)
+  }
+
+  if $acl {
+    validate_array($acl)
+  } else {
+    fail('$acl has to be at least one entry for ACME Challenge Location')
+  }
+
   # Use production api of letsencrypt only if $production is true
   if $production {
     $ca = $prod_ca
@@ -62,10 +72,10 @@ class getssl::global (
     $ca = $staging_ca
   }
 
-  if $domain {
-    validate_string($domain)
-  } else {
+  if !$domain {
     fail('$domain must be set')
+  } else {
+    validate_string($domain)
   }
 
   if $domain_account_mail {
@@ -87,6 +97,7 @@ class getssl::global (
     group   => root,
     mode    => "0644",
     content => epp('getssl/domain_getssl.cfg.epp', {
+     'base_dir'                  => $base_dir,
      'ca'                        => $ca,
      'ca_cert_location'          => $ca_cert_location,
      'domain_account_key_length' => $domain_account_key_length,

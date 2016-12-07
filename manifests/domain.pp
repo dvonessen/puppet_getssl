@@ -1,3 +1,12 @@
+# == Class: getssl:domain
+#
+#   This class configures the getssl domain part.
+#   Use this class to configure your specific domains.
+#
+#   Additionally this class calls getssl script to obtain the domain certificates
+#   and installs the appropriate cronjobs to ensure all certificates will be renewed
+#   at the right time spot.
+#
 class getssl::domain (
   $base_dir                  = $getssl::base_dir,
   $ca_cert_location          = $getssl::params::ca_cert_location,
@@ -59,7 +68,7 @@ class getssl::domain (
     validate_array($sub_domains)
   }
 
-  if $acl and size($acl) > 0 { 
+  if $acl and size($acl) > 0 {
     validate_array($acl)
   } else {
     fail('You have to set acl in your manifest!')
@@ -85,37 +94,37 @@ class getssl::domain (
   }
 
   file { "${base_dir}/conf/${domain}":
-    ensure  => directory,
-    owner   => root,
-    group   => root,
-    mode    => "0644",
+    ensure => directory,
+    owner  => root,
+    group  => root,
+    mode   => '0644',
   }
 
   file { "${base_dir}/conf/${domain}/getssl.cfg":
     ensure  => file,
     owner   => root,
     group   => root,
-    mode    => "0644",
+    mode    => '0644',
     content => epp('getssl/domain_getssl.cfg.epp', {
-     'acl'                       => $acl,
-     'base_dir'                  => $base_dir,
-     'ca'                        => $ca,
-     'ca_cert_location'          => $ca_cert_location,
-     'domain'                    => $domain,
-     'domain_account_key_length' => $domain_account_key_length,
-     'domain_account_mail'       => $domain_account_mail,
-     'domain_cert_location'      => $domain_cert_location,
-     'domain_chain_location'     => $domain_chain_location,
-     'domain_check_remote'       => $domain_check_remote,
-     'domain_key_cert_location'  => $domain_key_cert_location,
-     'domain_key_location'       => $domain_key_location,
-     'domain_pem_location'       => $domain_pem_location,
-     'domain_private_key_alg'    => $domain_private_key_alg,
-     'domain_reload_command'     => $domain_reload_command,
-     'domain_renew_allow'        => $domain_renew_allow,
-     'domain_server_type'        => $domain_server_type,
-     'sub_domains'               => $sub_domains,
-     'use_single_acl'            => $use_single_acl
+      'acl'                       => $acl,
+      'base_dir'                  => $base_dir,
+      'ca'                        => $ca,
+      'ca_cert_location'          => $ca_cert_location,
+      'domain'                    => $domain,
+      'domain_account_key_length' => $domain_account_key_length,
+      'domain_account_mail'       => $domain_account_mail,
+      'domain_cert_location'      => $domain_cert_location,
+      'domain_chain_location'     => $domain_chain_location,
+      'domain_check_remote'       => $domain_check_remote,
+      'domain_key_cert_location'  => $domain_key_cert_location,
+      'domain_key_location'       => $domain_key_location,
+      'domain_pem_location'       => $domain_pem_location,
+      'domain_private_key_alg'    => $domain_private_key_alg,
+      'domain_reload_command'     => $domain_reload_command,
+      'domain_renew_allow'        => $domain_renew_allow,
+      'domain_server_type'        => $domain_server_type,
+      'sub_domains'               => $sub_domains,
+      'use_single_acl'            => $use_single_acl
     }),
   }
 }

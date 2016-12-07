@@ -1,7 +1,8 @@
 # Class: getssl
 # ===========================
 #
-# Full description of class getssl here.
+# This is the default init.pp class. This Class installs getssl
+# and ensures that sufficient directories and files are createt.
 #
 # Parameters
 # ----------
@@ -62,10 +63,10 @@ class getssl (
     mode   => '0755',
   }
   file { "${base_dir}/conf":
-    ensure  => directory,
-    owner   => root,
-    group   => root,
-    mode    => '0755',
+    ensure => directory,
+    owner  => root,
+    group  => root,
+    mode   => '0755',
   }
   file { "${base_dir}/getssl":
     ensure => file,

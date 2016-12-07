@@ -1,3 +1,7 @@
+# == Class: getssl::params
+#
+#   This class sets all the sufficient default settings
+#
 class getssl::params{
   # Main parts
   $base_dir                  = '/opt/getssl'
@@ -16,7 +20,7 @@ class getssl::params{
   $global_renew_allow        = 30
   $global_server_type        = 'https'
   $global_check_remote       = true
-  $global_ssl_conf           = "/usr/lib/ssl/openssl.cnf"
+  $global_ssl_conf           = '/usr/lib/ssl/openssl.cnf'
 
   # Configuration of domain specific config file
   $domain                    = undef

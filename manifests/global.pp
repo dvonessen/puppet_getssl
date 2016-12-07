@@ -1,3 +1,8 @@
+# == Class: getssl::global
+#
+#   This class configures getssl's global configuration file
+#   Use this class to configure global settings and preferences for your getssl environment
+#
 class getssl::global (
   $base_dir                  = $getssl::base_dir,
   $production                = $getssl::params::production,
@@ -29,11 +34,11 @@ class getssl::global (
     validate_string($global_account_mail)
   }
 
-  file { "$base_dir/conf/getssl.cfg":
+  file { "${base_dir}/conf/getssl.cfg":
     ensure  => file,
     owner   => root,
     group   => root,
-    mode    => "0644",
+    mode    => '0644',
     content => epp('getssl/global_getssl.cfg.epp', {
       'global_ca'                 => $global_ca,
       'global_account_mail'       => $global_account_mail,

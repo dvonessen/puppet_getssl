@@ -144,8 +144,6 @@ define getssl::domain (
 
   if $domain_account_mail {
     validate_string($domain_account_mail)
-  } else {
-    fail('$domain_account_mail must be set')
   }
 
   file { "${base_dir}/conf/${domain}":

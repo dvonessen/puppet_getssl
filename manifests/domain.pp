@@ -57,9 +57,9 @@
 #
 #  Sample Usage:
 #    getssl::domain { 'example.org':
-#      production => true,
-#      acl        => ['/var/www/default/.well-known']
-#      sub_domain => ['www.example.org', 'foo.example.org', 'bar.example.org']
+#      production  => true,
+#      acl         => ['/var/www/default/.well-known']
+#      sub_domains => ['www.example.org', 'foo.example.org', 'bar.example.org']
 #    }
 #
 define getssl::domain (
@@ -84,7 +84,7 @@ define getssl::domain (
   $domain_key_cert_location  = $getssl::params::domain_key_cert_location,
   $domain_key_location       = $getssl::params::domain_key_location,
   $domain_pem_location       = $getssl::params::domain_pem_location,
-) inherits getssl::params {
+) {
 
   validate_string($domain_private_key_alg, $domain_server_type)
   validate_integer($domain_account_key_length)

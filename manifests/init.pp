@@ -74,26 +74,6 @@ class getssl (
     validate_string($account_mail)
   }
 
-  file { "${base_dir}/conf/getssl.cfg":
-    ensure  => file,
-    owner   => root,
-    group   => root,
-    mode    => '0644',
-    content => epp('getssl/global_getssl.cfg.epp', {
-      'ca'                 => $ca,
-      'account_mail'       => $account_mail,
-      'account_key_length' => $account_key_length,
-      'base_dir'           => $base_dir,
-      'private_key_alg'    => $private_key_alg,
-      'reuse_private_key'  => $reuse_private_key,
-      'reload_command'     => $reload_command,
-      'renew_allow'        => $renew_allow,
-      'server_type'        => $server_type,
-      'check_remote'       => $check_remote,
-      'ssl_conf'           => $ssl_conf,
-    }),
-  }
-
   if $manage_packages {
     package { $packages:
       ensure => latest,
@@ -120,5 +100,25 @@ class getssl (
     group  => root,
     mode   => '0700',
     source => 'puppet:///modules/getssl/getssl.sh',
+  }
+
+  file { "${base_dir}/conf/getssl.cfg":
+    ensure  => file,
+    owner   => root,
+    group   => root,
+    mode    => '0644',
+    content => epp('getssl/global_getssl.cfg.epp', {
+      'ca'                 => $ca,
+      'account_mail'       => $account_mail,
+      'account_key_length' => $account_key_length,
+      'base_dir'           => $base_dir,
+      'private_key_alg'    => $private_key_alg,
+      'reuse_private_key'  => $reuse_private_key,
+      'reload_command'     => $reload_command,
+      'renew_allow'        => $renew_allow,
+      'server_type'        => $server_type,
+      'check_remote'       => $check_remote,
+      'ssl_conf'           => $ssl_conf,
+    }),
   }
 }

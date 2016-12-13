@@ -29,7 +29,7 @@ DOMAIN_CERT_LOCATION="<%= $domain_cert_location -%>"
 DOMAIN_KEY_LOCATION="<%= $domain_key_location -%>"
 <% } -%>
 <% if $ca_cert_location { -%>
-CA_CERT_LOCATION="<%= $domain_cert_location -%>"
+CA_CERT_LOCATION="<%= $ca_cert_location -%>"
 <% } -%>
 <% if $domain_chain_location { -%>
 DOMAIN_CHAIN_LOCATION="<%= $domain_chain_location -%>"

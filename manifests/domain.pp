@@ -182,7 +182,7 @@ define getssl::domain (
   }
 
   exec { "${base_dir}/getssl -w ${base_dir}/conf -q ${domain}":
-    path        => [$base_dir],
+    path        => ['/bin', '/usr/bin', '/usr/sbin', $base_dir],
     subscribe   => File["${base_dir}/conf/${domain}/getssl.cfg"],
     refreshonly => true,
   }

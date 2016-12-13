@@ -5,13 +5,13 @@ CA=<%= $ca -%>
 #AGREEMENT="https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf"
 
 ACCOUNT_EMAIL="<%= $domain_account_email -%>"
-ACCOUNT_KEY_LENGTH=<%= $domain_account_key_lengt %>
+ACCOUNT_KEY_LENGTH=<%= $domain_account_key_length %>
 ACCOUNT_KEY="<%= $base_dir %>/conf/<%= $domain %>/${domain}.key"
 PRIVATE_KEY_ALG="<%= $domain_private_key_alg -%>"
 
 # Additional domains - this could be multiple domains / subdomains in a comma separated list
 # Note: this is Additional domains - so should not include the primary domain.
-SANS="<%= join($sub_domains, ",") -%>,"
+SANS=<%= join($sub_domains, ",") -%>
 
 # Acme Challenge Location. The first line for the domain, the following ones for each additional domain.
 # If these start with ssh: then the next variable is assumed to be the hostname and the rest the location.

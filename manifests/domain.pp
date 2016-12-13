@@ -9,34 +9,51 @@
 #
 #
 #   Parameters:
-#   [*base_dir*]                  - Sets the base directory for getssl. Defaults to /opt/getssl
-#   [*production*]                - BOOL. If true: call production server of Letsencrypt.
+#   [*base_dir*]
+#     Sets the base directory for getssl. Defaults to /opt/getssl
+#   [*production*]
+#     BOOL. If true: call production server of Letsencrypt.
 #     If false: script calls staging server. Default false.
-#   [*prod_ca*]                   - Production CA of Letsencrypt.
-#   [*staging_ca*]                - Staging CA fo Letsencrypt.
-#   [*domain*]                    - Used to create configuration folder and initial configuration
+#   [*prod_ca*]
+#     Production CA of Letsencrypt.
+#   [*staging_ca*]
+#     Staging CA fo Letsencrypt.
+#   [*domain*]
+#     - Used to create configuration folder and initial configuration
 #     file for getssl. Defaults to undef. Must be set.
-#   [*acl*]                       - Sets ACME Chalenge Location directory. Empty array by default
-#   [*use_single_acl*]            - Bool if true: only one acl directory must be specified. 
+#   [*acl*]
+#     Sets ACME Chalenge Location directory. Empty array by default
+#   [*use_single_acl*]
+#     Bool if true: only one acl directory must be specified. 
 #     If false: for each subdomain on acl. Default true.
-#   [*sub_domains*]               - Array with all subdomains for specified certificate. 
-#     Defaults to empty Array.
-#   [*domain_private_key_alg*]    - Sets Key Algorythm. Defaults to rsa
-#   [*domain_account_key_length*] - Key length for ssl certificates. Defaults to 4096
-#   [*domain_account_mail*]       - Email for registration account. Defaults to undef
-#   [*domain_check_remote*]       - BOOL checks if certificate is available and online.
-#     Defaults to global configuration.
-#   [*domain_reload_command*]     - Set command to reload e.g Webserver. Defaults to Global Command
-#   [*domain_renew_allow*]        - Integer sets interval of certificate renewal. 
-#     Default 30 days before expiration.
-#   [*domain_server_type*]        - Sets servertype to check e.g HTTPs. Default https
-#   [*ca_cert_location*]          - Configures location for Certificate Authority File.
-#     Defaults to undef
-#   [*domain_cert_location*]      - Configures certifacte location. Defaults to undef.
-#   [*domain_chain_location*]     - Configures chain file location. Defaults to undef.
-#   [*domain_key_cert_location*]  - Configures Key-Cert file location. Defaults to undef.
-#   [*domain_key_location*]       - Configures Key file location. Defaults to undef.
-#   [*domain_pem_location*]       - Configures Pem file location. Defaults to undef.
+#   [*sub_domains*]
+#     Array with all subdomains for specified certificate. Defaults to empty Array.
+#   [*domain_private_key_alg*]
+#     Sets Key Algorythm. Defaults to rsa
+#   [*domain_account_key_length*]
+#     Key length for ssl certificates. Defaults to 4096
+#   [*domain_account_mail*]
+#     Email for registration account. Defaults to undef
+#   [*domain_check_remote*]
+#     BOOL checks if certificate is available and online. Defaults to global configuration.
+#   [*domain_reload_command*]
+#     Set command to reload e.g Webserver. Defaults to Global Command
+#   [*domain_renew_allow*]
+#     Integer sets interval of certificate renewal. Default 30 days before expiration.
+#   [*domain_server_type*]
+#     Sets servertype to check e.g HTTPs. Default https
+#   [*ca_cert_location*]
+#     Configures location for Certificate Authority File. Defaults to undef
+#   [*domain_cert_location*]
+#     Configures certifacte location. Defaults to undef.
+#   [*domain_chain_location*]
+#     Configures chain file location. Defaults to undef.
+#   [*domain_key_cert_location*]
+#     Configures Key-Cert file location. Defaults to undef.
+#   [*domain_key_location*]
+#     Configures Key file location. Defaults to undef.
+#   [*domain_pem_location*]
+#     Configures Pem file location. Defaults to undef.
 #
 #  Sample Usage:
 #    getssl::domain { 'example.org':

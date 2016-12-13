@@ -7,33 +7,51 @@
 # Adds a cronjob to ensure all your certificates are updated properly
 #
 # Parameters
-# ----------
+#   [*base_dir*]
+#     Base directory for getssl script and configuration. Default /opt
+#   [*production*]
+#     Bool if true: use production letsencrypt server.
+#     If false use staging server. Default false
+#   [*prod_ca*]
+#     Production CA of Letsencrypt.
+#   [*staging_ca*]
+#     Staging CA fo Letsencrypt.
+#   [*manage_packages*]
+#     Bool if true: Install specified Packages. If false don't. Default false
+#   [*packages*]
+#     Installs sufficient Packages for getssl. Default curl
+#   [*account_mail*]
+#     Global Email Address for Letsencrypt registration
+#   [*account_key_length*]
+#     Account key length. Default 4096
+#   [*account_key_alg*]
+#     Account key algorythm. Default rsa
+#   [*reload_command*]
+#     Specifies reload for services. E.g systemctl restart apach2. Default undef
+#   [*reuse_private_key*]
+#     Bool if true private key is generated only once and used for each domain. Default true
+#   [*renew_allow*]
+#     Integer sets interval of certificate renewal. Default 30 days before expiration.
+#   [*server_type*]
+#     Sets server type e.g to https. Default https
+#   [*check_remote*]
+#     Bool. Check if certificate is correct installed. Default true
+#   [*ssl_conf*]
+#     Default location for openssl.cnf file. Default /usr/lib/ssl/openssl.cnf
 #
-# Document parameters here.
+# Action
+# ===========================
 #
-# * `sample parameter`
-# Explanation of what this parameter affects and what it defaults to.
-# e.g. "Specify one or more upstream ntp servers as an array."
-#
-# Variables
-# ----------
-#
-# Here you should define a list of variables that this module would require.
-#
-# * `sample variable`
-#  Explanation of how this variable affects the function of this class and if
-#  it has a default. e.g. "The parameter enc_ntp_servers must be set by the
-#  External Node Classifier as a comma separated list of hostnames." (Note,
-#  global variables should be avoided in favor of class parameters as
-#  of Puppet 2.6.)
+#   - Installs getssl 
+#   - Configure global getssl.cfg
+#   - Installs cronjob for certificate renewal
 #
 # Examples
 # --------
 #
-# @example
-#    class { 'getssl':
-#      servers => [ 'pool.ntp.org', 'ntp.local.company.com' ],
-#    }
+#   class { 'getssl':
+#     account_mail => 'admin@example.com',
+#   }
 #
 # Authors
 # -------
@@ -42,9 +60,11 @@
 
 class getssl (
   $base_dir           = $getssl::params::base_dir,
+  $production         = $getssl::params::production,
+  $prod_ca            = $getssl::params::prod_ca,
+  $staging_ca         = $getssl::params::staging_ca,
   $manage_packages    = $getssl::params::manage_packages,
   $packages           = $getssl::params::packages,
-  $production         = $getssl::params::production,
   $account_mail       = $getssl::params::account_mail,
   $account_key_length = $getssl::params::account_key_length,
   $private_key_alg    = $getssl::params::private_key_alg,
@@ -65,22 +85,23 @@ class getssl (
 
   # Use production api of letsencrypt if $production is true
   if $production {
-    $ca = 'https://acme-v01.api.letsencrypt.org'
+    $ca = $prod_ca
   } else {
-    $ca = 'https://acme-staging.api.letsencrypt.org'
+    $ca = $staging_ca
   }
 
   if $account_mail {
     validate_string($account_mail)
   }
 
+  # Install packages if $manage_packages is true
   if $manage_packages {
     package { $packages:
       ensure => latest,
     }
   }
 
-  # Create Directories under /opt
+  # Create Base Directories
   file { $base_dir:
     ensure => directory,
     owner  => root,
@@ -120,5 +141,13 @@ class getssl (
       'check_remote'       => $check_remote,
       'ssl_conf'           => $ssl_conf,
     }),
+  }
+
+  cron { 'getssl_renew':
+    ensure  => present,
+    command => "${base_dir}/getssl -w ${base_dir}/conf -a -q -u",
+    user    => 'root',
+    hour    => '23',
+    minute  => '5',
   }
 }

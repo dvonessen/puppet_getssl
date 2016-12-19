@@ -179,6 +179,7 @@ define getssl::domain (
       'sub_domains'               => $sub_domains,
       'use_single_acl'            => $use_single_acl
     }),
+    notify  => "${base_dir}/getssl -w ${base_dir}/conf -q ${domain}"
   }
 
   exec { "${base_dir}/getssl -w ${base_dir}/conf -q ${domain}":

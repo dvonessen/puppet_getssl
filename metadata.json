@@ -14,7 +14,8 @@
   "operatingsystem_support": [
   {
   "operatingsystem": "Debian",
-  "operatingsystemrelease": "8 / Jessie"
+  "operatingsystemrelease": "8"
   },
   "data_provider": null
 }
+

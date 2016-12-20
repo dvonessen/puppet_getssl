@@ -1,6 +1,6 @@
 {
   "name": "thielking/getssl",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Daniel Thielking",
   "summary": "Uses getssl shell script from srvrco to get LetsEncrypt-Certificates",
   "license": "Apache-2.0",

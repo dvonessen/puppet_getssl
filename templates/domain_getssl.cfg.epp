@@ -11,10 +11,10 @@ PRIVATE_KEY_ALG="<%= $domain_private_key_alg -%>"
 
 # Additional domains - this could be multiple domains / subdomains in a comma separated list
 # Note: this is Additional domains - so should not include the primary domain.
-<% if $sub_domains { -%>
-SANS=<%= join($sub_domains, ",") -%>
-<% } else { -%>
+<% if empty($sub_domains) { -%>
 SANS=
+<% } else { -%>
+SANS=<%= join($sub_domains, ",") -%>
 <% } -%>
 
 # Acme Challenge Location. The first line for the domain, the following ones for each additional domain.

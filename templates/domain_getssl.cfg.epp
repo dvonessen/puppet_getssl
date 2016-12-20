@@ -15,7 +15,7 @@ PRIVATE_KEY_ALG="<%= $domain_private_key_alg -%>"
 SANS=<%= join($sub_domains, ",") -%>
 <% } else { -%>
 SANS=
-<% } -%}
+<% } -%>
 
 # Acme Challenge Location. The first line for the domain, the following ones for each additional domain.
 # If these start with ssh: then the next variable is assumed to be the hostname and the rest the location.

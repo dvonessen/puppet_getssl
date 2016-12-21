@@ -145,7 +145,7 @@ class getssl (
 
   cron { 'getssl_renew':
     ensure  => present,
-    command => "${base_dir}/getssl -w ${base_dir}/conf -a -q -u",
+    command => "${base_dir}/getssl -w ${base_dir}/conf -a -q -U",
     user    => 'root',
     hour    => '23',
     minute  => '5',

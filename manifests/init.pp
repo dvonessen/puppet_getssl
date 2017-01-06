@@ -3,7 +3,7 @@
 #
 # This is the default init.pp class. This Class installs getssl
 # and ensures that sufficient directories and files are createt.
-# 
+#
 # Adds a cronjob to ensure all your certificates are updated properly
 #
 # Parameters
@@ -20,6 +20,8 @@
 #     Bool if true: Install specified Packages. If false don't. Default false
 #   [*packages*]
 #     Installs sufficient Packages for getssl. Default curl
+#   [*manage_cron*]
+#     Whether to manage a cronjob for maintaining certificates.  Defaults to true.
 #   [*account_mail*]
 #     Global Email Address for Letsencrypt registration
 #   [*account_key_length*]
@@ -42,7 +44,7 @@
 # Action
 # ===========================
 #
-#   - Installs getssl 
+#   - Installs getssl
 #   - Configure global getssl.cfg
 #   - Installs cronjob for certificate renewal
 #
@@ -65,6 +67,7 @@ class getssl (
   $staging_ca         = $getssl::params::staging_ca,
   $manage_packages    = $getssl::params::manage_packages,
   $packages           = $getssl::params::packages,
+  $manage_cron        = $getssl::params::manage_cron,
   $account_mail       = $getssl::params::account_mail,
   $account_key_length = $getssl::params::account_key_length,
   $private_key_alg    = $getssl::params::private_key_alg,
@@ -143,11 +146,13 @@ class getssl (
     }),
   }
 
-  cron { 'getssl_renew':
-    ensure  => present,
-    command => "${base_dir}/getssl -w ${base_dir}/conf -a -q -U",
-    user    => 'root',
-    hour    => '23',
-    minute  => '5',
+  if $manage_cron {
+    cron { 'getssl_renew':
+      ensure  => present,
+      command => "${base_dir}/getssl -w ${base_dir}/conf -a -q -U",
+      user    => 'root',
+      hour    => '23',
+      minute  => '5',
+    }
   }
 }

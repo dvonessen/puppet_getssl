@@ -10,6 +10,7 @@ class getssl::params{
   $staging_ca                = 'https://acme-staging.api.letsencrypt.org'
   $manage_packages           = false
   $packages                  = ['curl']
+  $manage_cron               = true
 
   # Configuration of global getssl config file
   $account_mail       = undef

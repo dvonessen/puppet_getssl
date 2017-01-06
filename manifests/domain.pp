@@ -24,7 +24,7 @@
 #   [*acl*]
 #     Sets ACME Chalenge Location directory. Empty array by default
 #   [*use_single_acl*]
-#     Bool if true: only one acl directory must be specified. 
+#     Bool if true: only one acl directory must be specified.
 #     If false: for each subdomain on acl. Default true.
 #   [*sub_domains*]
 #     Array with all subdomains for specified certificate. Defaults to empty Array.
@@ -54,6 +54,8 @@
 #     Configures Key file location. Defaults to undef.
 #   [*domain_pem_location*]
 #     Configures Pem file location. Defaults to undef.
+#   [*suppress_getssl_run*]
+#     If true, does not run getssl as part of the
 #
 #  Sample Usage:
 #    getssl::domain { 'example.org':
@@ -84,6 +86,7 @@ define getssl::domain (
   $domain_key_cert_location  = $getssl::params::domain_key_cert_location,
   $domain_key_location       = $getssl::params::domain_key_location,
   $domain_pem_location       = $getssl::params::domain_pem_location,
+  $suppress_getssl_run       = $getssl::params::suppress_getssl_run,
 ) {
 
   validate_string($domain_private_key_alg, $domain_server_type)
@@ -153,6 +156,14 @@ define getssl::domain (
     mode   => '0644',
   }
 
+  if $suppress_getssl_run {
+    # Don't run getssl immediately
+    $config_notifiers = []
+  } else {
+    # Default behaviour
+    $config_notifiers = [ Exec["${base_dir}/getssl -U -w ${base_dir}/conf -q ${domain}"] ]
+  }
+
   file { "${base_dir}/conf/${domain}/getssl.cfg":
     ensure  => file,
     owner   => root,
@@ -179,10 +190,12 @@ define getssl::domain (
       'sub_domains'               => $sub_domains,
       'use_single_acl'            => $use_single_acl
     }),
-    notify  => Exec["${base_dir}/getssl -U -w ${base_dir}/conf -q ${domain}"],
+    notify  => $config_notifiers,
   }
 
-  exec { "${base_dir}/getssl -U -w ${base_dir}/conf -q ${domain}":
-    path        => ['/bin', '/usr/bin', '/usr/sbin', $base_dir],
+  unless $suppress_getssl_run {
+    exec { "${base_dir}/getssl -U -w ${base_dir}/conf -q ${domain}":
+      path        => ['/bin', '/usr/bin', '/usr/sbin', $base_dir],
+    }
   }
 }

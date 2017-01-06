@@ -41,4 +41,6 @@ class getssl::params{
   $domain_key_cert_location  = undef
   $domain_key_location       = undef
   $domain_pem_location       = undef
+  # Suppress running getssl inside Puppet.  Thus, rely only on the cron job
+  $suppress_getssl_run       = false
 }

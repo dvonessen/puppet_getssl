@@ -196,6 +196,7 @@ define getssl::domain (
   unless $suppress_getssl_run {
     exec { "${base_dir}/getssl -U -w ${base_dir}/conf -q ${domain}":
       path        => ['/bin', '/usr/bin', '/usr/sbin', $base_dir],
+      refreshonly => true,
     }
   }
 }

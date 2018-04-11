@@ -45,8 +45,11 @@ DOMAIN_KEY_CERT_LOCATION="<%= $domain_key_cert_location -%>"
 DOMAIN_PEM_LOCATION="<%= $doamin_pem_location -%>"
 <% } -%>
 
+<% if $domain_reload_command { -%>
 # The command needed to reload apache / nginx or whatever you use
 RELOAD_CMD="<%= $domain_reload_command -%>"
+<% } -%>
+
 # The time period within which you want to allow renewal of a certificate
 #  this prevents hitting some of the rate limits.
 RENEW_ALLOW=<%= $domain_renew_allow %>

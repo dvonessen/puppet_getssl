@@ -36,6 +36,8 @@
 #     Email for registration account. Defaults to undef
 #   [*domain_check_remote*]
 #     BOOL checks if certificate is available and online. Defaults to global configuration.
+#   [*domain_check_remote_wait*]
+#     Seconds to wait after executing reload_command before checking remote certificate.
 #   [*domain_reload_command*]
 #     Set command to reload e.g Webserver. Defaults to Global Command
 #   [*domain_renew_allow*]
@@ -77,6 +79,7 @@ define getssl::domain (
   $domain_account_key_length = $getssl::params::domain_account_key_length,
   $domain_account_mail       = $getssl::params::domain_account_mail,
   $domain_check_remote       = $getssl::params::domain_check_remote,
+  $domain_check_remote_wait  = $getssl::params::domain_check_remote_wait,
   $domain_reload_command     = $getssl::params::domain_reload_command,
   $domain_renew_allow        = $getssl::params::domain_renew_allow,
   $domain_server_type        = $getssl::params::domain_server_type,
@@ -180,6 +183,7 @@ define getssl::domain (
       'domain_cert_location'      => $domain_cert_location,
       'domain_chain_location'     => $domain_chain_location,
       'domain_check_remote'       => $domain_check_remote,
+      'domain_check_remote_wait'  => $domain_check_remote_wait,
       'domain_key_cert_location'  => $domain_key_cert_location,
       'domain_key_location'       => $domain_key_location,
       'domain_pem_location'       => $domain_pem_location,

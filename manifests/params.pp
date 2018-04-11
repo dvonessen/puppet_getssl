@@ -32,6 +32,7 @@ class getssl::params{
   $domain_account_key_length = 4096
   $domain_account_mail       = undef
   $domain_check_remote       = true
+  $domain_check_remote_wait  = undef
   $domain_reload_command     = undef
   $domain_renew_allow        = 30
   $domain_server_type        = 'https'

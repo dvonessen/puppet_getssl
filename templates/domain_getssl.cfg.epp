@@ -60,3 +60,6 @@ RENEW_ALLOW=<%= $domain_renew_allow %>
 # an update to confirm correct certificate is running (if CHECK_REMOTE) is set to true
 SERVER_TYPE="<%= $domain_server_type -%>"
 CHECK_REMOTE="<%= $domain_check_remote -%>"
+<% if $domain_check_remote_wait { -%>
+CHECK_REMOTE_WAIT="<%= $domain_check_remote_wait -%>"
+<% } -%>

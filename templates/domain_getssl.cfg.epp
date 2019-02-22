@@ -4,7 +4,7 @@ CA=<%= $ca -%>
 
 #AGREEMENT="https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf"
 
-ACCOUNT_EMAIL="<%= $domain_account_email -%>"
+ACCOUNT_EMAIL="<%= $domain_account_mail -%>"
 ACCOUNT_KEY_LENGTH=<%= $domain_account_key_length %>
 ACCOUNT_KEY="<%= $base_dir %>/conf/<%= $domain %>/${domain}.key"
 PRIVATE_KEY_ALG="<%= $domain_private_key_alg -%>"
@@ -38,7 +38,7 @@ CA_CERT_LOCATION="<%= $ca_cert_location -%>"
 <% if $domain_chain_location { -%>
 DOMAIN_CHAIN_LOCATION="<%= $domain_chain_location -%>"
 <% } -%>
-<% if $domain_key_cert_loaction { -%>
+<% if $domain_key_cert_location { -%>
 DOMAIN_KEY_CERT_LOCATION="<%= $domain_key_cert_location -%>"
 <% } -%>
 <% if $domain_pem_location { -%>

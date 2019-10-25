@@ -50,7 +50,7 @@
 # 2016-05-04 Improve check for if DNS_DEL_COMMAND is blank. (0.31)
 # 2016-05-06 Setting umask to 077 for security of private keys etc. (0.32)
 # 2016-05-20 update to reflect changes in staging ACME server json (0.33)
-# 2016-05-20 tidying up checking of json following AMCE changes. (0.34)
+# 2016-05-20 tidying up checking of json following ACME changes. (0.34)
 # 2016-05-21 added AUTH_DNS_SERVER to getssl.cfg as optional definition of authoritative DNS server (0.35)
 # 2016-05-21 added DNS_WAIT to getssl.cfg as (default = 10 seconds as before) (0.36)
 # 2016-05-21 added PUBLIC_DNS_SERVER option, for forcing use of an external DNS server (0.37)
@@ -114,20 +114,20 @@
 # 2016-09-27 added additional debug info issue #119 (1.47)
 # 2016-09-27 removed IPv6 switch in favour of checking both IPv4 and IPv6 (1.48)
 # 2016-09-28 Add -Q, or --mute, switch to mute notifications about successfully upgrading getssl (1.49)
-# 2016-09-30 improved portability to work natively on FreeBSD, Slackware and OSX (1.50)
+# 2016-09-30 improved portability to work natively on FreeBSD, Slackware and Mac OS X (1.50)
 # 2016-09-30 comment out PRIVATE_KEY_ALG from the domain template Issue #125 (1.51)
 # 2016-10-03 check remote certificate for right domain before saving to local (1.52)
 # 2016-10-04 allow existing CSR with domain name in subject (1.53)
 # 2016-10-05 improved the check for CSR with domain in subject (1.54)
 # 2016-10-06 prints update info on what was included in latest updates (1.55)
 # 2016-10-06 when using -a flag, ignore folders in working directory which aren't domains (1.56)
-# 2016-10-12 alllow multiple tokens in DNS challenge (1.57)
-# 2016-10-14 added CHECK_ALL_AUTH_DNS option to check all DNS servres, not just one primary server (1.58)
+# 2016-10-12 allow multiple tokens in DNS challenge (1.57)
+# 2016-10-14 added CHECK_ALL_AUTH_DNS option to check all DNS servers, not just one primary server (1.58)
 # 2016-10-14 added archive of chain and private key for each cert, and purge old archives (1.59)
 # 2016-10-17 updated info comment on failed cert due to rate limits. (1.60)
 # 2016-10-17 fix error messages when using 1.0.1e-fips  (1.61)
 # 2016-10-20 set secure permissions when generating account key (1.62)
-# 2016-10-20 set permsissions to 700 for getssl script during upgrade (1.63)
+# 2016-10-20 set permissions to 700 for getssl script during upgrade (1.63)
 # 2016-10-20 add option to revoke a certificate (1.64)
 # 2016-10-21 set revocation server default to acme-v01.api.letsencrypt.org (1.65)
 # 2016-10-21 bug fix for revocation on different servers. (1.66)
@@ -173,14 +173,24 @@
 # 2016-12-28 tidied up upgrade tmpfile handling (1.95)
 # 2017-01-01 update comments
 # 2017-01-01 create stable release 2.0 (2.00)
-# 2017-01-02 Added option to limit amount of old versions to keep (2.01)
+# 2017-01-02 Added option to limit number of old versions to keep (2.01)
 # 2017-01-03 Created check_config function to list all obvious config issues (2.02)
 # 2017-01-10 force renew if FORCE_RENEWAL file exists (2.03)
 # 2017-01-12 added drill, dig or host as alternatives to nslookup (2.04)
+# 2017-01-18 bugfix issue #227 - error deleting csr if doesn't exist
+# 2017-01-18 issue #228 check private key and account key are different (2.05)
+# 2017-01-21 issue #231 mingw bugfix and typos in debug messages (2.06)
+# 2017-01-29 issue #232 use neutral locale for date formatting (2.07)
+# 2017-01-30 issue #243 compatibility with bash 3.0 (2.08)
+# 2017-01-30 issue #243 additional compatibility with bash 3.0 (2.09)
+# 2017-02-18 add OCSP Must-Staple to the domain csr generation (2.10)
+# 2019-09-30 issue #423 Use HTTP 1.1 as workaround atm (2.11)
+# 2019-10-02 issue #425 Case insensitive processing of agreement url because of HTTP/2 (2.12)
+# 2019-10-07 update DNS checks to allow use of CNAMEs (2.13)
 # ----------------------------------------------------------------------------------------
 
 PROGNAME=${0##*/}
-VERSION="2.04"
+VERSION="2.13"
 
 # defaults
 ACCOUNT_KEY_LENGTH=4096
@@ -212,6 +222,7 @@ REUSE_PRIVATE_KEY="true"
 SERVER_TYPE="https"
 SKIP_HTTP_TOKEN_CHECK="false"
 SSLCONF="$(openssl version -d 2>/dev/null| cut -d\" -f2)/openssl.cnf"
+OCSP_MUST_STAPLE="false"
 TEMP_UPGRADE_FILE=""
 TOKEN_USER_ID=""
 USE_SINGLE_ACL="false"
@@ -229,6 +240,7 @@ _UPGRADE=0
 _UPGRADE_CHECK=1
 _USE_DEBUG=0
 config_errors="false"
+LANG=C
 
 # store copy of original command in case of upgrading script and re-running
 ORIGCMD="$0 $*"
@@ -236,7 +248,7 @@ ORIGCMD="$0 $*"
 # Define all functions (in alphabetical order)
 
 cert_archive() {  # Archive certificate file by copying files to dated archive dir.
-  debug "creating an achive copy of current new certs"
+  debug "creating an archive copy of current new certs"
   date_time=$(date +%Y_%m_%d_%H_%M)
   mkdir -p "${DOMAIN_DIR}/archive/${date_time}"
   umask 077
@@ -312,14 +324,24 @@ check_config() { # check the config files for all obvious errors
   debug "checking config"
 
   # check keys
-  if [[ ! "$ACCOUNT_KEY_TYPE" =~ ^(rsa|prime256v1|secp384r1|secp521r1)$ ]]; then
-    info "${DOMAIN}: invalid ACCOUNT_KEY_TYPE"
+  case "$ACCOUNT_KEY_TYPE" in
+    rsa|prime256v1|secp384r1|secp521r1)
+      debug "checked ACCOUNT_KEY_TYPE " ;;
+    *)
+      info "${DOMAIN}: invalid ACCOUNT_KEY_TYPE - $ACCOUNT_KEY_TYPE"
+      config_errors=true ;;
+  esac
+  if [[ "$ACCOUNT_KEY" == "$DOMAIN_DIR/${DOMAIN}.key" ]]; then
+    info "${DOMAIN}: ACCOUNT_KEY and domain key ( $DOMAIN_DIR/${DOMAIN}.key ) must be different"
     config_errors=true
   fi
-  if [[ ! "$PRIVATE_KEY_ALG" =~ ^(rsa|prime256v1|secp384r1|secp521r1)$ ]]; then
-    info "${DOMAIN}: invalid PRIVATE_KEY_ALG"
-    config_errors=true
-  fi
+  case "$PRIVATE_KEY_ALG" in
+    rsa|prime256v1|secp384r1|secp521r1)
+      debug "checked PRIVATE_KEY_ALG " ;;
+    *)
+      info "${DOMAIN}: invalid PRIVATE_KEY_ALG - $PRIVATE_KEY_ALG"
+      config_errors=true ;;
+  esac
   if [[ "$DUAL_RSA_ECDSA" == "true" ]] && [[ "$PRIVATE_KEY_ALG" == "rsa" ]]; then
     info "${DOMAIN}: PRIVATE_KEY_ALG not set to an EC type and DUAL_RSA_ECDSA=\"true\""
     config_errors=true
@@ -437,14 +459,14 @@ check_getssl_upgrade() { # check if a more recent version of code is available a
         declare -a getssl_versions
         shopt -s nullglob
         for getssl_version in $0.v*; do
-          getssl_versions+=($getssl_version)
+          getssl_versions[${#getssl_versions[@]}]="$getssl_version"
         done
         shopt -u nullglob
         # Explicitly sort the getssl_versions array to make sure
         shopt -s -o noglob
         IFS=$'\n' getssl_versions=($(sort <<< "${getssl_versions[*]}"))
         shopt -u -o noglob
-        # Remove entries until given amount of old versions to keep is reached
+        # Remove entries until given number of old versions to keep is reached
         while [[ ${#getssl_versions[@]} -gt $_KEEP_VERSIONS ]]; do
           debug "removing old version ${getssl_versions[0]}"
           rm "${getssl_versions[0]}"
@@ -508,7 +530,7 @@ copy_file_to_location() { # copies a file, using scp, sftp or ftp if required.
       fi
     elif [[ "${to:0:4}" == "ftp:" ]] ; then
       if [[ "$cert" != "challenge token" ]] ; then
-        error_exit "ftp is not a sercure method for copying certificates or keys"
+        error_exit "ftp is not a secure method for copying certificates or keys"
       fi
       debug "using ftp to copy the file from $from"
       ftpuser=$(echo "$to"| awk -F: '{print $2}')
@@ -603,6 +625,11 @@ create_csr() { # create a csr using a given key (if it doesn't already exist)
     tmp_conf=$(mktemp)
     cat "$SSLCONF" > "$tmp_conf"
     printf "[SAN]\n%s" "$SANLIST" >> "$tmp_conf"
+    # add OCSP Must-Staple to the domain csr
+    # if openssl version >= 1.1.0 one can also use "tlsfeature = status_request"
+    if [[ "$OCSP_MUST_STAPLE" == "true" ]]; then
+      printf "\n1.3.6.1.5.5.7.1.24 = DER:30:03:02:01:05" >> "$tmp_conf"
+    fi
     openssl req -new -sha256 -key "$csr_key" -subj "$CSR_SUBJECT" -reqexts SAN -config "$tmp_conf" > "$csr_file"
     rm -f "$tmp_conf"
   fi
@@ -612,13 +639,13 @@ create_key() { # create a domain key (if it doesn't already exist)
   key_type=$1 # domain key type
   key_loc=$2  # domain key location
   key_len=$3  # domain key length - for rsa keys.
-  # check if domain key exists, if not then create it.
+  # check if key exists, if not then create it.
   if [[ -s "$key_loc" ]]; then
     debug "domain key exists at $key_loc - skipping generation"
     # ideally need to check validity of domain key
   else
     umask 077
-    info "creating domain key - $key_loc"
+    info "creating key - $key_loc"
     case "$key_type" in
       rsa)
         openssl genrsa "$key_len" > "$key_loc";;
@@ -629,7 +656,9 @@ create_key() { # create a domain key (if it doesn't already exist)
     esac
     umask "$ORIG_UMASK"
     # remove csr on generation of new domain key
-    rm -f "${key_loc::-4}.csr"
+    if [[ -e "${key_loc::-4}.csr" ]]; then
+      rm -f "${key_loc::-4}.csr"
+    fi
   fi
 }
 
@@ -650,7 +679,7 @@ date_epoc() { # convert the date into epoch time
 date_fmt() { # format date from epoc time to YYYY-MM-DD
   if [[ "$os" == "bsd" ]]; then #uses older style date function.
     date -j -f "%s" "$1" +%F
-  elif [[ "$os" == "mac" ]]; then # MAC OSX uses older BSD style date.
+  elif [[ "$os" == "mac" ]]; then # macOS uses older BSD style date.
     date -j -f "%s" "$1" +%F
   else
     date -d "@$1" +%F
@@ -835,7 +864,7 @@ get_os() { # function to get the current Operating System
     os="mac"
   elif [[ ${uname_res:0:6} == "CYGWIN" ]]; then
     os="cygwin"
-  elif [[ ${uname_res:0:6} == "MINGW" ]]; then
+  elif [[ ${uname_res:0:5} == "MINGW" ]]; then
     os="mingw"
   else
     os="unknown"
@@ -911,15 +940,15 @@ help_message() { # print out the help message
 
 	Options:
 	  -a, --all          Check all certificates
-	  -d, --debug        Outputs debug information
+	  -d, --debug        Output debug information
 	  -c, --create       Create default config files
 	  -f, --force        Force renewal of cert (overrides expiry checks)
 	  -h, --help         Display this help message and exit
 	  -q, --quiet        Quiet mode (only outputs on error, success of new cert, or getssl was upgraded)
-	  -Q, --mute         Like -q, but mutes notification about successful upgrade
+	  -Q, --mute         Like -q, but also mute notification about successful upgrade
 	  -r, --revoke   "cert" "key" [CA_server] Revoke a certificate (the cert and key are required)
 	  -u, --upgrade      Upgrade getssl if a more recent version is available
-	  -k, --keep     "#" Maximum amount of old getssl versions to keep when upgrading
+	  -k, --keep     "#" Maximum number of old getssl versions to keep when upgrading
 	  -U, --nocheck      Do not check if a more recent version is available
 	  -w working_dir "Working directory"
 
@@ -1109,7 +1138,14 @@ send_signed_request() { # Sends a request to the ACME server, signed with your p
 
   CURL_HEADER="$TEMP_DIR/curl.header"
   dp="$TEMP_DIR/curl.dump"
-  CURL="curl --silent --dump-header $CURL_HEADER "
+
+  CURL="curl "
+  if [[ "$($CURL -V | head -1 | cut -d' ' -f2 )" > "7.33" ]]; then
+    CURL="$CURL --http1.1 "
+  fi
+
+  CURL="$CURL --silent --dump-header $CURL_HEADER "
+
   if [[ ${_USE_DEBUG} -eq 1 ]]; then
     CURL="$CURL --trace-ascii $dp "
   fi
@@ -1137,9 +1173,9 @@ send_signed_request() { # Sends a request to the ACME server, signed with your p
 
   # Send header + extended header + payload + signature to the acme-server
   body="{\"header\": ${header},"
-  body+="\"protected\": \"${protected64}\","
-  body+="\"payload\": \"${payload64}\","
-  body+="\"signature\": \"${signed64}\"}"
+  body="${body}\"protected\": \"${protected64}\","
+  body="${body}\"payload\": \"${payload64}\","
+  body="${body}\"signature\": \"${signed64}\"}"
   debug "header, payload and signature = $body"
 
   code="500"
@@ -1409,6 +1445,11 @@ done
 # Get the current OS, so the correct functions can be used for that OS. (sets the variable os)
 get_os
 
+# check if "recent" version of bash.
+#if [[ "${BASH_VERSINFO[0]}${BASH_VERSINFO[1]}" -lt 42 ]]; then
+#  info "this script is designed for bash v4.2 or later - earlier version may give errors"
+#fi
+
 #check if required applications are included
 
 requires which
@@ -1444,7 +1485,7 @@ if [[ $_REVOKE -eq 1 ]]; then
 fi
 
 # get latest agreement from CA (as default)
-AGREEMENT=$(curl -I "${CA}/terms" 2>/dev/null | awk '$1 ~ "Location:" {print $2}'|tr -d '\r')
+AGREEMENT=$(curl -I "${CA}/terms" 2>/dev/null | awk 'tolower($1) ~ "location:" {print $2}'|tr -d '\r')
 
 # if nothing in command line, print help and exit.
 if [[ -z "$DOMAIN" ]] && [[ ${_CHECK_ALL} -ne 1 ]]; then
@@ -1472,6 +1513,9 @@ DOMAIN_DIR="$DOMAIN_STORAGE/$DOMAIN"
 CERT_FILE="$DOMAIN_DIR/${DOMAIN}.crt"
 CA_CERT="$DOMAIN_DIR/chain.crt"
 TEMP_DIR="$DOMAIN_DIR/tmp"
+if [[ "$os" == "mingw" ]]; then
+  CSR_SUBJECT="//"
+fi
 
 # Set the OPENSSL_CONF environment variable so openssl knows which config to use
 export OPENSSL_CONF=$SSLCONF
@@ -1675,7 +1719,7 @@ if [[ -s "$CERT_FILE" ]]; then
     if [[ $(date_renew) -lt "$enddate_s" ]] && [[ $_FORCE_RENEW -ne 1 ]]; then
       issuer=$(openssl x509 -in "$CERT_FILE" -noout -issuer 2>/dev/null)
       if [[ "$issuer" == *"Fake LE Intermediate"* ]] && [[ "$CA" == "https://acme-v01.api.letsencrypt.org" ]]; then
-        debug "upgradeing from fake cert to real"
+        debug "upgrading from fake cert to real"
       else
         info "${DOMAIN}: certificate is valid for more than $RENEW_ALLOW days (until $enddate)"
         # everything is OK, so exit.
@@ -1689,8 +1733,8 @@ fi
 # end of .... if there is an existing certificate file, check details.
 
 if [[ ! -t 0 ]] && [[ "$PREVENT_NON_INTERACTIVE_RENEWAL" = "true" ]]; then
-  errmsg="$DOMAIN due for renewal, "
-  errmsg+="but not completed due to PREVENT_NON_INTERACTIVE_RENEWAL=true in config"
+  errmsg="$DOMAIN due for renewal,"
+  errmsg="${errmsg} but not completed due to PREVENT_NON_INTERACTIVE_RENEWAL=true in config"
   error_exit "$errmsg"
 fi
 
@@ -1702,7 +1746,7 @@ else
   create_key "$ACCOUNT_KEY_TYPE" "$ACCOUNT_KEY" "$ACCOUNT_KEY_LENGTH"
 fi
 
-# if not reusing priavte key, then remove the old keys
+# if not reusing private key, then remove the old keys
 if [[ "$REUSE_PRIVATE_KEY" != "true" ]]; then
   if [[ -s "$DOMAIN_DIR/${DOMAIN}.key" ]]; then
    rm -f "$DOMAIN_DIR/${DOMAIN}.key"
@@ -1947,13 +1991,13 @@ if [[ $VALIDATE_VIA_DNS == "true" ]]; then
                            | grep '"'|awk -F'"' '{ print $2}')
           elif [[ "$DNS_CHECK_FUNC" == "drill" ]] || [[ "$DNS_CHECK_FUNC" == "dig" ]]; then
             check_result=$($DNS_CHECK_FUNC TXT "_acme-challenge.${d}" "@${ns}" \
-                           | grep ^_acme|awk -F'"' '{ print $2}')
+                           | grep '300 IN TXT'|awk -F'"' '{ print $2}')
           elif [[ "$DNS_CHECK_FUNC" == "host" ]]; then
             check_result=$($DNS_CHECK_FUNC -t TXT "_acme-challenge.${d}" "${ns}" \
-                           | grep ^_acme|awk -F'"' '{ print $2}')
+                           | grep 'descriptive text'|awk -F'"' '{ print $2}')
           else
             check_result=$(nslookup -type=txt "_acme-challenge.${d}" "${ns}" \
-                           | grep ^_acme|awk -F'"' '{ print $2}')
+                           | grep 'text ='|awk -F'"' '{ print $2}')
           fi
           debug "expecting  $auth_key"
           debug "${ns} gave ... $check_result"
